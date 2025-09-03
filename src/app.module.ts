@@ -1,6 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import {
+  Gateway,
+  GatewayLog,
+  PeripheralDevice,
+  Tenant,
+  DeviceType,
+} from './entities';
 
 @Module({
   imports: [
@@ -14,11 +21,17 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DATABASE_USERNAME || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'password',
       database: process.env.DATABASE_NAME || 'gateway_management',
-      entities: [],
+      entities: [Gateway, PeripheralDevice, GatewayLog, Tenant, DeviceType],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV === 'development',
     }),
-    TypeOrmModule.forFeature([]),
+    TypeOrmModule.forFeature([
+      Gateway,
+      PeripheralDevice,
+      GatewayLog,
+      Tenant,
+      DeviceType,
+    ]),
   ],
   controllers: [],
   providers: [],
