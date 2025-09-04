@@ -134,7 +134,7 @@ export class GatewayService {
     }
   }
 
-  async addDevice(
+  async addDeviceWithGateway(
     gatewayId: string,
     deviceId: string,
   ): Promise<GatewayResponseDto> {
@@ -183,7 +183,7 @@ export class GatewayService {
     }
   }
 
-  async removeDevice(
+  async removeDeviceWithGateway(
     gatewayId: string,
     deviceId: string,
   ): Promise<GatewayResponseDto> {
