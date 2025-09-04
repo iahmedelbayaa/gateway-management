@@ -5,7 +5,7 @@ import {
   UpdateGatewayDto,
   GatewayResponseDto,
 } from 'src/dtos';
-import { Gateway, GatewayLog } from 'src/entities';
+import { Gateway, GatewayLog, PeripheralDevice } from 'src/entities';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -15,6 +15,8 @@ export class GatewayService {
     private gatewayRepository: Repository<Gateway>,
     @InjectRepository(GatewayLog)
     private gatewayLogRepository: Repository<GatewayLog>,
+    @InjectRepository(PeripheralDevice)
+    private peripheralDeviceRepository: Repository<PeripheralDevice>,
   ) {}
 
   async createGateway(
@@ -129,6 +131,89 @@ export class GatewayService {
         throw error;
       }
       throw new ConflictException(`Failed to delete gateway with ID ${id}`);
+    }
+  }
+
+  async addDevice(
+    gatewayId: string,
+    deviceId: string,
+  ): Promise<GatewayResponseDto> {
+    try {
+      const gateway = await this.gatewayRepository.findOne({
+        where: { id: gatewayId },
+        relations: ['devices'],
+      });
+      if (!gateway) {
+        throw new ConflictException(`Gateway with ID ${gatewayId} not found`);
+      }
+
+      // Check device limit (max 10 devices per gateway)
+      if (gateway.devices.length >= 10) {
+        throw new ConflictException('Gateway cannot have more than 10 devices');
+      }
+
+      const device = await this.peripheralDeviceRepository.findOne({
+        where: { id: deviceId },
+      });
+      if (!device) {
+        throw new ConflictException(`Device with ID ${deviceId} not found`);
+      }
+
+      if (device.gateway_id) {
+        throw new ConflictException('Device is already assigned to a gateway');
+      }
+
+      device.gateway_id = gatewayId;
+      await this.peripheralDeviceRepository.save(device);
+
+      // Create log entry
+      await this.createLog(gatewayId, 'DEVICE_ATTACHED', {
+        deviceId,
+        deviceUid: device.uid,
+      });
+
+      return this.getGatewayById(gatewayId);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new ConflictException(
+        `Failed to add device ${deviceId} to gateway ${gatewayId}`,
+      );
+    }
+  }
+
+  async removeDevice(
+    gatewayId: string,
+    deviceId: string,
+  ): Promise<GatewayResponseDto> {
+    try {
+      const device = await this.peripheralDeviceRepository.findOne({
+        where: { id: deviceId, gateway_id: gatewayId },
+      });
+      if (!device) {
+        throw new ConflictException(
+          `Device with ID ${deviceId} not found in gateway ${gatewayId}`,
+        );
+      }
+
+      device.gateway_id = undefined;
+      await this.peripheralDeviceRepository.save(device);
+
+      // Create log entry
+      await this.createLog(gatewayId, 'DEVICE_DETACHED', {
+        deviceId,
+        deviceUid: device.uid,
+      });
+
+      return this.getGatewayById(gatewayId);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      throw new ConflictException(
+        `Failed to remove device ${deviceId} from gateway ${gatewayId}`,
+      );
     }
   }
 
