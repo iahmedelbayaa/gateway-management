@@ -22,7 +22,7 @@ import {
       password: process.env.DATABASE_PASSWORD || 'password',
       database: process.env.DATABASE_NAME || 'gateway_management',
       entities: [Gateway, PeripheralDevice, GatewayLog, Tenant, DeviceType],
-      synchronize: process.env.NODE_ENV !== 'production',
+      synchronize: false, // Use migrations instead
       logging: process.env.NODE_ENV === 'development',
     }),
     TypeOrmModule.forFeature([

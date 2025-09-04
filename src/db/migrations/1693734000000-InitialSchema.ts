@@ -8,7 +8,7 @@ export class InitialSchema1693734000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
       
-      CREATE TABLE "tenants" (
+      CREATE TABLE IF NOT EXISTS "tenants" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "name" character varying NOT NULL,
         "contact_email" character varying NOT NULL,
@@ -20,7 +20,7 @@ export class InitialSchema1693734000000 implements MigrationInterface {
 
     // Create device_types table
     await queryRunner.query(`
-      CREATE TABLE "device_types" (
+      CREATE TABLE IF NOT EXISTS "device_types" (
         "id" SERIAL NOT NULL,
         "name" character varying NOT NULL,
         "description" text,
@@ -31,9 +31,13 @@ export class InitialSchema1693734000000 implements MigrationInterface {
 
     // Create gateways table
     await queryRunner.query(`
-      CREATE TYPE "gateway_status_enum" AS ENUM('active', 'inactive', 'decommissioned');
+      DO $$ BEGIN
+        CREATE TYPE "gateway_status_enum" AS ENUM('active', 'inactive', 'decommissioned');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
       
-      CREATE TABLE "gateways" (
+      CREATE TABLE IF NOT EXISTS "gateways" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "serial_number" character varying NOT NULL,
         "name" character varying NOT NULL,
@@ -52,9 +56,13 @@ export class InitialSchema1693734000000 implements MigrationInterface {
 
     // Create peripheral_devices table
     await queryRunner.query(`
-      CREATE TYPE "device_status_enum" AS ENUM('online', 'offline', 'maintenance');
+      DO $$ BEGIN
+        CREATE TYPE "device_status_enum" AS ENUM('online', 'offline', 'maintenance');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
       
-      CREATE TABLE "peripheral_devices" (
+      CREATE TABLE IF NOT EXISTS "peripheral_devices" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "uid" bigint NOT NULL,
         "vendor" character varying NOT NULL,
@@ -72,7 +80,7 @@ export class InitialSchema1693734000000 implements MigrationInterface {
 
     // Create gateway_logs table
     await queryRunner.query(`
-      CREATE TABLE "gateway_logs" (
+      CREATE TABLE IF NOT EXISTS "gateway_logs" (
         "id" bigserial NOT NULL,
         "gateway_id" uuid NOT NULL,
         "action" character varying NOT NULL,
@@ -85,12 +93,21 @@ export class InitialSchema1693734000000 implements MigrationInterface {
 
     // Insert initial device types
     await queryRunner.query(`
-      INSERT INTO "device_types" ("name", "description") VALUES
-      ('sensor', 'Environmental or data collection sensors'),
-      ('actuator', 'Control devices that perform physical actions'),
-      ('controller', 'Logic control and processing devices'),
-      ('display', 'Information display devices'),
-      ('communication', 'Communication and networking devices');
+      INSERT INTO "device_types" ("name", "description") 
+      SELECT 'sensor', 'Environmental or data collection sensors'
+      WHERE NOT EXISTS (SELECT 1 FROM "device_types" WHERE "name" = 'sensor')
+      UNION ALL
+      SELECT 'actuator', 'Control devices that perform physical actions'
+      WHERE NOT EXISTS (SELECT 1 FROM "device_types" WHERE "name" = 'actuator')
+      UNION ALL
+      SELECT 'controller', 'Logic control and processing devices'
+      WHERE NOT EXISTS (SELECT 1 FROM "device_types" WHERE "name" = 'controller')
+      UNION ALL
+      SELECT 'display', 'Information display devices'
+      WHERE NOT EXISTS (SELECT 1 FROM "device_types" WHERE "name" = 'display')
+      UNION ALL
+      SELECT 'communication', 'Communication and networking devices'
+      WHERE NOT EXISTS (SELECT 1 FROM "device_types" WHERE "name" = 'communication');
     `);
   }
 
