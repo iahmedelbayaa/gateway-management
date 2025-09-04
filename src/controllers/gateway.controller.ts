@@ -45,7 +45,7 @@ export class GatewayController {
     status: 409,
     description: 'Gateway with serial number or IP already exists',
   })
-  create(
+  createGateway(
     @Body() createGatewayDto: CreateGatewayDto,
   ): Promise<GatewayResponseDto> {
     return this.gatewayService.createGateway(createGatewayDto);
@@ -58,7 +58,7 @@ export class GatewayController {
     description: 'List of all gateways',
     type: [Gateway],
   })
-  findAll(): Promise<GatewayResponseDto[]> {
+  findAllGateways(): Promise<GatewayResponseDto[]> {
     return this.gatewayService.getAllGateways();
   }
 
@@ -71,7 +71,7 @@ export class GatewayController {
     type: Gateway,
   })
   @ApiResponse({ status: 404, description: 'Gateway not found' })
-  findOne(@Param('id') id: string): Promise<GatewayResponseDto> {
+  findOneGateway(@Param('id') id: string): Promise<GatewayResponseDto> {
     return this.gatewayService.getGatewayById(id);
   }
 
@@ -90,7 +90,7 @@ export class GatewayController {
     status: 409,
     description: 'Gateway with IP already exists',
   })
-  update(
+  updateGateway(
     @Param('id') id: string,
     @Body() updateGatewayDto: UpdateGatewayDto,
   ): Promise<GatewayResponseDto> {
@@ -105,7 +105,7 @@ export class GatewayController {
   @ApiResponse({ status: 204, description: 'Gateway successfully deleted' })
   @ApiResponse({ status: 404, description: 'Gateway not found' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
+  async removeGateway(@Param('id') id: string): Promise<void> {
     await this.gatewayService.deleteGateway(id);
   }
 
@@ -120,7 +120,7 @@ export class GatewayController {
   })
   @ApiResponse({ status: 400, description: 'Gateway device limit exceeded' })
   @ApiResponse({ status: 404, description: 'Gateway or device not found' })
-  addDevice(
+  addDeviceWithGateway(
     @Param('id') gatewayId: string,
     @Param('deviceId') deviceId: string,
   ): Promise<GatewayResponseDto> {
@@ -140,7 +140,7 @@ export class GatewayController {
     status: 404,
     description: 'Gateway or device not found in gateway',
   })
-  removeDevice(
+  removeDeviceWithGateway(
     @Param('id') gatewayId: string,
     @Param('deviceId') deviceId: string,
   ): Promise<GatewayResponseDto> {
