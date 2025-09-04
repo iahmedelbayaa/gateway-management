@@ -8,6 +8,10 @@ import {
   Tenant,
   DeviceType,
 } from './entities';
+import { GatewayController } from './controllers/gateway.controller';
+import { DeviceController } from './controllers/device.controller';
+import { DeviceService } from './services/device.service';
+import { GatewayService } from './services/gateway.service';
 
 @Module({
   imports: [
@@ -33,7 +37,7 @@ import {
       DeviceType,
     ]),
   ],
-  controllers: [],
-  providers: [],
+  controllers: [GatewayController, DeviceController],
+  providers: [GatewayService, DeviceService],
 })
 export class AppModule {}
