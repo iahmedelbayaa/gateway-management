@@ -120,12 +120,12 @@ export class GatewayService {
         throw new ConflictException(`Gateway with ID ${id} not found`);
       }
 
-      await this.gatewayRepository.remove(gateway);
-
-      // Create log entry
+      // Create log entry BEFORE deleting the gateway
       await this.createLog(gateway.id, 'DELETED', {
         gateway,
       });
+
+      await this.gatewayRepository.remove(gateway);
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
