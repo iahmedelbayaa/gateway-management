@@ -143,7 +143,7 @@ export class GatewayController {
   removeDeviceWithGateway(
     @Param('id') gatewayId: string,
     @Param('deviceId') deviceId: string,
-  ): Promise<GatewayResponseDto> {
+  ): Promise<boolean> {
     return this.gatewayService.removeDeviceWithGateway(gatewayId, deviceId);
   }
 }

@@ -186,7 +186,7 @@ export class GatewayService {
   async removeDeviceWithGateway(
     gatewayId: string,
     deviceId: string,
-  ): Promise<GatewayResponseDto> {
+  ): Promise<boolean> {
     try {
       const device = await this.peripheralDeviceRepository.findOne({
         where: { id: deviceId, gateway_id: gatewayId },
@@ -206,7 +206,7 @@ export class GatewayService {
         deviceUid: device.uid,
       });
 
-      return this.getGatewayById(gatewayId);
+      return true;
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
