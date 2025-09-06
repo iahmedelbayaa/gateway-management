@@ -4,7 +4,7 @@ A comprehensive REST API for managing gateways and their associated peripheral d
 
 ## 🚀 Features
 
-- **Gateway Management**: Create, read, update, and delete gateways
+- **Gateway Management**: Create, read, and delete gateways
 - **Device Management**: Manage peripheral devices with global unique identifiers
 - **Device Assignment**: Attach/detach devices to/from gateways (max 10 devices per gateway)
 - **Data Validation**: Comprehensive input validation with proper error handling
@@ -109,27 +109,25 @@ The application will be available at:
 
 ### Gateway Endpoints
 
-| Method   | Endpoint                          | Description                              |
-| -------- | --------------------------------- | ---------------------------------------- |
-| `POST`   | `/gateways`                       | Create a new gateway                     |
-| `GET`    | `/gateways`                       | Get all gateways with devices            |
-| `GET`    | `/gateways/:id`                   | Get gateway details by ID                |
-| `PATCH`  | `/gateways/:id`                   | Update gateway (serial number immutable) |
-| `DELETE` | `/gateways/:id`                   | Delete gateway (orphans devices)         |
-| `POST`   | `/gateways/:id/devices/:deviceId` | Attach device to gateway                 |
-| `DELETE` | `/gateways/:id/devices/:deviceId` | Remove device from gateway               |
+| Method   | Endpoint                                 | Description                       |
+| -------- | ---------------------------------------- | --------------------------------- |
+| `POST`   | `/gateways`                              | Create a new gateway              |
+| `GET`    | `/gateways`                              | Get all gateways                  |
+| `GET`    | `/gateways/:id`                          | Get gateway details by ID         |
+| `DELETE` | `/gateways/:id`                          | Delete gateway                    |
+| `POST`   | `/gateways/:gatewayId/devices`           | Add new device to gateway         |
+| `POST`   | `/gateways/:gatewayId/devices/:deviceId` | Attach existing device to gateway |
+| `DELETE` | `/gateways/:gatewayId/devices/:deviceId` | Remove device from gateway        |
 
 ### Device Endpoints
 
-| Method   | Endpoint                 | Description                       |
-| -------- | ------------------------ | --------------------------------- |
-| `POST`   | `/devices`               | Create a new peripheral device    |
-| `GET`    | `/devices`               | Get all devices                   |
-| `GET`    | `/devices/orphans`       | Get unassigned devices            |
-| `GET`    | `/devices/:id`           | Get device details by ID          |
-| `PATCH`  | `/devices/:id`           | Update device details             |
-| `DELETE` | `/devices/:id`           | Delete device                     |
-| `POST`   | `/devices/:id/heartbeat` | Update device last seen timestamp |
+| Method   | Endpoint         | Description                |
+| -------- | ---------------- | -------------------------- |
+| `POST`   | `/devices`       | Create a new device        |
+| `GET`    | `/devices`       | Get all devices            |
+| `GET`    | `/devices/:id`   | Get device details by ID   |
+| `DELETE` | `/devices/:id`   | Delete device              |
+| `GET`    | `/devices/types` | Get available device types |
 
 ### Example API Usage
 
@@ -263,12 +261,13 @@ NODE_ENV=development
 
 ```
 src/
-├── controllers/          # REST API controllers
+├── controllers/          # REST API controllers (gateway, device)
 ├── services/            # Business logic services
 ├── entities/            # TypeORM entities
 ├── dtos/               # Data transfer objects
-├── database/           # Database configuration & migrations
-├── scripts/            # Utility scripts
+├── db/                 # Database configuration & migrations
+│   ├── migrations/     # Database migration files
+│   └── seeds/         # Database seeding scripts
 └── main.ts            # Application entry point
 ```
 
