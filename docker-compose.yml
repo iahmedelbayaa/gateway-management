@@ -1,4 +1,27 @@
 services:
+  # NestJS Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gateway-app
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: gateway_user
+      DATABASE_PASSWORD: gateway_password
+      DATABASE_NAME: gateway_management
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - gateway-network
+
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
@@ -17,6 +40,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
+    networks:
+      - gateway-network
+
+networks:
+  gateway-network:
+    driver: bridge
 
 volumes:
   postgres_data:
