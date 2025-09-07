@@ -13,25 +13,82 @@ A comprehensive REST API for managing gateways and their associated peripheral d
 - **Testing**: Unit and E2E tests with comprehensive coverage
 - **Logging**: Gateway activity logging with detailed audit trail
 
+## 🎥 Demo Videos
+
+The project includes demonstration videos showcasing the application features:
+
+- **`demo/demo.mkv`**: Quick overview of core functionality
+- **`demo/full-demo.mkv`**: Complete feature demonstration and API walkthrough
+
+These videos provide visual guidance for understanding the application's capabilities and usage patterns.
+
 ## 📋 Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
+- [Quick Start with Docker](#quick-start-with-docker)
+- [Manual Installation](#manual-installation)
 - [Database Setup](#database-setup)
 - [Running the Application](#running-the-application)
 - [API Endpoints](#api-endpoints)
 - [Testing](#testing)
 - [Database Schema](#database-schema)
 - [Environment Configuration](#environment-configuration)
+- [Docker Configuration](#docker-configuration)
 - [Development](#development)
 
 ## 📦 Prerequisites
 
+### For Docker Setup (Recommended)
+- **Docker** 20.10+
+- **Docker Compose** 2.0+
+
+### For Manual Setup
 - **Node.js** 18+
 - **PostgreSQL** 12+
 - **npm** or **yarn**
 
-## ⚡ Installation
+## 🚀 Quick Start with Docker
+
+The fastest way to get the application running is using Docker Compose:
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd gateway-management
+   ```
+
+2. **Start the application with Docker**
+   ```bash
+   # Build and start all services (app + database)
+   docker-compose up --build
+
+   # Or run in detached mode
+   docker-compose up --build -d
+   ```
+
+3. **Run database migrations and seed data**
+   ```bash
+   # Wait for the app to start, then run migrations
+   docker-compose exec app npm run migration:run
+   docker-compose exec app npm run seed
+   ```
+
+4. **Access the application**
+   - **API**: http://localhost:3000
+   - **Swagger Documentation**: http://localhost:3000/api
+   - **Database**: localhost:5432
+
+5. **View logs** (if running in detached mode)
+   ```bash
+   docker-compose logs -f app
+   ```
+
+6. **Stop the application**
+   ```bash
+   docker-compose down
+   ```
+
+## ⚡ Manual Installation
 
 1. **Clone the repository**
 
@@ -98,6 +155,16 @@ npm run start:prod
 
 ```bash
 npm run start:debug
+```
+
+### With Docker
+
+```bash
+# Development with hot reload
+docker-compose up --build
+
+# Production mode
+docker-compose -f docker-compose.yml up --build
 ```
 
 The application will be available at:
@@ -255,6 +322,72 @@ PORT=3000
 NODE_ENV=development
 ```
 
+## 🐳 Docker Configuration
+
+The project includes a complete Docker setup with the following files:
+
+### **Dockerfile**
+- Multi-stage build for optimized production image
+- Based on Node.js 18 Alpine for minimal size
+- Non-root user for security
+- Automatic dependency installation and build
+
+### **docker-compose.yml**
+- **App Service**: NestJS application container
+- **PostgreSQL Service**: Database with health checks
+- **Networking**: Internal network for service communication
+- **Volumes**: Persistent database storage
+
+### **Environment Files**
+- `.env.production`: Production environment variables
+- `.env.example`: Template for environment setup
+
+### **Docker Commands**
+
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Run in background
+docker-compose up --build -d
+
+# View service logs
+docker-compose logs -f app
+docker-compose logs -f postgres
+
+# Stop all services
+docker-compose down
+
+# Remove all containers and volumes
+docker-compose down -v
+
+# Rebuild specific service
+docker-compose build app
+
+# Execute commands in running container
+docker-compose exec app npm run migration:run
+docker-compose exec app npm run seed
+docker-compose exec app bash
+
+# Scale the application (if needed)
+docker-compose up --scale app=3
+```
+
+### **Production Deployment**
+
+For production deployment, ensure you:
+
+1. Update environment variables in `.env.production`
+2. Use proper secrets management
+3. Configure reverse proxy (nginx/traefik)
+4. Set up monitoring and logging
+5. Configure backup strategies for PostgreSQL data
+
+```bash
+# Production deployment
+docker-compose -f docker-compose.yml up --build -d
+```
+
 ## 🛠️ Development
 
 ### Code Structure
@@ -269,6 +402,22 @@ src/
 │   ├── migrations/     # Database migration files
 │   └── seeds/         # Database seeding scripts
 └── main.ts            # Application entry point
+
+demo/
+├── demo.mkv           # Application demo video
+└── full-demo.mkv      # Complete feature demonstration
+
+docker/
+├── Dockerfile          # Application container configuration
+├── .dockerignore      # Docker build exclusions
+└── docker-compose.yml # Multi-service orchestration
+
+config/
+├── .env.example       # Environment template
+├── .env.production    # Production environment
+└── postman/          # API testing collections
+    ├── Gateway-Management-API.postman_collection.json
+    └── Gateway-Management.postman_environment.json
 ```
 
 ### Development Scripts
@@ -285,6 +434,34 @@ npm run migration:generate -- -n MigrationName
 
 # Revert last migration
 npm run migration:revert
+
+# Database operations
+npm run migration:run    # Run pending migrations
+npm run seed            # Seed test data
+npm run db:setup        # Run migrations + seed
+```
+
+### Docker Development Workflow
+
+```bash
+# Start development environment
+docker-compose up --build
+
+# Run database operations
+docker-compose exec app npm run migration:run
+docker-compose exec app npm run seed
+
+# Access application logs
+docker-compose logs -f app
+
+# Access database
+docker-compose exec postgres psql -U gateway_user -d gateway_management
+
+# Restart specific service
+docker-compose restart app
+
+# Update dependencies (rebuild needed)
+docker-compose build --no-cache app
 ```
 
 ## 📋 Business Rules
@@ -338,6 +515,25 @@ This project is licensed under the UNLICENSED License - see the LICENSE file for
 
 ## 🚀 Quick Start Guide
 
+### With Docker (Recommended)
+
+1. **Clone and start**: 
+   ```bash
+   git clone <repository-url>
+   cd gateway-management
+   docker-compose up --build
+   ```
+
+2. **Initialize database** (in new terminal):
+   ```bash
+   docker-compose exec app npm run migration:run
+   docker-compose exec app npm run seed
+   ```
+
+3. **Visit API documentation**: http://localhost:3000/api
+
+### Manual Setup
+
 1. **Install dependencies**: `npm install`
 2. **Setup database**: Create PostgreSQL database and update `.env`
 3. **Initialize database**: `npm run db:setup`
@@ -345,6 +541,14 @@ This project is licensed under the UNLICENSED License - see the LICENSE file for
 5. **Visit API documentation**: http://localhost:3000/api
 
 Your gateway management system is now ready! 🎉
+
+### 🐳 Docker Benefits
+
+- **Consistent Environment**: Same setup across development, testing, and production
+- **Easy Database Setup**: PostgreSQL automatically configured and ready
+- **Simplified Dependencies**: No need to install Node.js or PostgreSQL locally
+- **Quick Teardown**: `docker-compose down` removes everything cleanly
+- **Scalability**: Easy to scale services independently
 
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
